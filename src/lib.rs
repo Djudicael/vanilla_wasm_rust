@@ -1,20 +1,26 @@
-// Specify the name of the JavaScript module that exports the function
-#[link(wasm_import_module = "defined-in-js")]
-extern "C" {
-    // Declare a Rust function that can call the `myFunction` function in JavaScript
-    // Declare a Rust function that can call the `log` function in JavaScript
-    fn log(message_ptr: *const u8, message_len: usize);
+extern crate core;
+
+use serde::Serialize;
+
+#[derive(Serialize)]
+struct MyData {
+    name: String,
+    age: u32,
 }
 
 #[no_mangle]
-pub extern "C" fn tructdefou() {
-    // Create a Rust string to log
-    let message = "Hello from Rust!".to_string();
+pub extern "C" fn get_json() -> *const u8 {
+    let data = MyData {
+        name: "tatayoyoy".to_string(),
+        age: 32,
+    };
 
-    // Call the `log` function in JavaScript from Rust
-    unsafe {
-        log(message.as_ptr(), message.len());
-    }
+    let json_string = serde_json::to_string(&data).unwrap();
+    let json_bytes = json_string.as_bytes();
+    let json_bytes_ptr = json_bytes.as_ptr();
+    core::mem::forget(json_string);
+
+    json_bytes_ptr
 }
 
 #[no_mangle]
